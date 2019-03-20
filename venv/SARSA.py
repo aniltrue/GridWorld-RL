@@ -4,7 +4,7 @@ import numpy as np
 import random as rnd
 
 class SarsaAgent(Agent):
-    def __init__(self, env: Environment, discountRate = 0.995, epsilon = 2.0, epsilonDecay = 0.995, epsilonMin = 0.1, alpha = 0.2):
+    def __init__(self, env: Environment, discountRate = 0.995, epsilon = 1.0, epsilonDecay = 0.995, epsilonMin = 0.1, alpha = 0.2):
         '''
         Initiate the Agent with hyperparameters
         :param env: The Environment where the Agent plays.
@@ -48,21 +48,24 @@ class SarsaAgent(Agent):
 
         for episode in range(maxEpisode):
             currentState = self.env.reset()
+            action = self.act(currentState, True)
+
             done = False
             maxTD = 0.0
 
             while not done:
-                action = self.act(currentState, True)
-
                 nextState, reward, done = env.move(action)
 
-                q = reward + self.Q[nextState][self.act(nextState, True)] if not done else reward
+                nextAction = self.act(nextState, True)
+
+                q = reward + self.Q[nextState][nextAction] if not done else reward
                 TD = q - self.Q[currentState, action]
 
                 self.Q[currentState][action] += self.alpha * TD
 
                 maxTD = max(maxTD, abs(TD))
                 currentState = nextState
+                action = nextAction
 
             if printDetails:
                 print("%d. episode completed. Max. TD: %f" % (episode, maxTD))
